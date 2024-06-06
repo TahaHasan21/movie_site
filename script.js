@@ -1,31 +1,6 @@
-// Import the Firebase libraries
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyBLNJQxgSanvtbBPi5E9ELMFQs1TOxGDxE",
-  authDomain: "movie-website-6d4ec.firebaseapp.com",
-  projectId: "movie-website-6d4ec",
-  storageBucket: "movie-website-6d4ec.appspot.com",
-  messagingSenderId: "10328262937",
-  appId: "1:10328262937:web:2360d99bb79c6f95d7dd88",
-  measurementId: "G-2XE25RVXS5"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
 
 const apiKey = 'e87dfff4';
-
-document.getElementById('searchForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    document.querySelector('.container').classList.add('top');
-    searchMovie();
-});
 
 function searchMovie() {
     const query = document.getElementById('searchQuery').value;

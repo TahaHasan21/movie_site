@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Playlists</title>
+    <link rel="stylesheet" href="mylist.css">
+</head>
+<body>
+<header>
+    <nav class="navbar">
+        <span class="hamburger-btn material-symbols-rounded">menu</span>        
+        <h2>My Movies</h2>
+        <ul class="links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="mylist.html">MyList</a></li>
+        </ul>            
+        <button id="logout" class="logout-btn">LOG OUT</button>
+    </nav>
+</header>
+
+<h1>My Playlists</h1>
+<button id="viewPrivate">View Private Playlists</button>
+<div id="playlists"></div>
+
+<script>
+    const displayPlaylists = (type) => {
+        const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
+        const filteredPlaylists = playlists.filter(playlist => playlist.type === type);
+        const playlistsContainer = document.getElementById('playlists');
+        playlistsContainer.innerHTML = '';
+
+        if (filteredPlaylists.length === 0) {
+            playlistsContainer.innerHTML = `<p>No ${type} playlists found</p>`;
+        } else {
+            filteredPlaylists.forEach((movie, index) => {
+                const movieDiv = document.createElement('div');
+                movieDiv.className = 'movie';
+                movieDiv.innerHTML = `
+                    <h3>${movie.Title}</h3>
+                    <img src="${movie.Poster}" alt="${movie.Title}">
+                    <p><strong>Year:</strong> ${movie.Year}</p>
+                    <button onclick="removeFromPlaylist(${index}, '${type}')">Remove</button>
+                `;
+                playlistsContainer.appendChild(movieDiv);
+            });
+        }
+    };
+
+    const removeFromPlaylist = (index, type) => {
+        const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
+        const filteredPlaylists = playlists.filter(playlist => playlist.type === type);
+        const movie = filteredPlaylists[index];
+
+        const newPlaylists = playlists.filter(playlist => !(playlist.imdbID === movie.imdbID && playlist.type === type));
+        localStorage.setItem('playlists', JSON.stringify(newPlaylists));
+
+        displayPlaylists(type);
+    };
+
+    document.getElementById('viewPrivate').addEventListener('click', () => {
+        const password = prompt('Enter your password to view private playlists');
+        const user = firebase.auth().currentUser;
+        if (user) {
+            const credentials = firebase.auth.EmailAuthProvider.credential(user.email, password);
+            user.reauthenticateWithCredential(credentials).then(() => {
+                displayPlaylists('private');
+            }).catch((error) => {
+                alert('Authentication failed');
+            });
+        } else {
+            alert('No user signed in');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        displayPlaylists('public');
+    });
+</script>
+</body>
+</html>
