@@ -61,7 +61,7 @@ const apiKey = 'e87dfff4';
 function getMovieDetails() {
     const urlParams = new URLSearchParams(window.location.search);
     const movieId = urlParams.get('id');
-    const url = `http://www.omdbapi.com/?i=${movieId}&apikey=${apiKey}`;
+    const url = `https://www.omdbapi.com/?i=${movieId}&apikey=${apiKey}`;
 
     fetch(url)
         .then(response => response.json())
