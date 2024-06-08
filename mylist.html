@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Playlists</title>
+    <title>Movie Library</title>
     <link rel="stylesheet" href="mylist.css">
 </head>
 <body>
@@ -23,7 +23,33 @@
 <button id="viewPrivate">View Private Playlists</button>
 <div id="playlists"></div>
 
-<script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBLNJQxgSanvtbBPi5E9ELMFQs1TOxGDxE",
+        authDomain: "movie-website-6d4ec.firebaseapp.com",
+        projectId: "movie-website-6d4ec",
+        storageBucket: "movie-website-6d4ec.appspot.com",
+        messagingSenderId: "10328262937",
+        appId: "1:10328262937:web:2360d99bb79c6f95d7dd88",
+        measurementId: "G-2XE25RVXS5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    document.getElementById('logout').addEventListener('click', () => {
+        auth.signOut().then(() => {
+            window.location.href = 'index.html';
+        }).catch((error) => {
+            console.error('Error signing out:', error);
+        });
+    });
+
     const displayPlaylists = (type) => {
         const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
         const filteredPlaylists = playlists.filter(playlist => playlist.type === type);
@@ -40,9 +66,18 @@
                     <h3>${movie.Title}</h3>
                     <img src="${movie.Poster}" alt="${movie.Title}">
                     <p><strong>Year:</strong> ${movie.Year}</p>
-                    <button onclick="removeFromPlaylist(${index}, '${type}')">Remove</button>
+                    <button class="remove-btn" data-index="${index}" data-type="${type}">Remove</button>
                 `;
                 playlistsContainer.appendChild(movieDiv);
+            });
+
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.remove-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const index = e.target.getAttribute('data-index');
+                    const type = e.target.getAttribute('data-type');
+                    removeFromPlaylist(index, type);
+                });
             });
         }
     };
@@ -60,9 +95,9 @@
 
     document.getElementById('viewPrivate').addEventListener('click', () => {
         const password = prompt('Enter your password to view private playlists');
-        const user = firebase.auth().currentUser;
+        const user = auth.currentUser;
         if (user) {
-            const credentials = firebase.auth.EmailAuthProvider.credential(user.email, password);
+            const credentials = auth.EmailAuthProvider.credential(user.email, password);
             user.reauthenticateWithCredential(credentials).then(() => {
                 displayPlaylists('private');
             }).catch((error) => {
