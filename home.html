@@ -78,7 +78,7 @@
 
     function searchMovie() {
         const query = searchQueryInput.value;
-        const url = `http://www.omdbapi.com/?s=${query}&apikey=${apiKey}`;
+        const url = `https://www.omdbapi.com/?s=${query}&apikey=${apiKey}`;
 
         fetch(url)
             .then(response => response.json())
