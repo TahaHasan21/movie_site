@@ -21,7 +21,7 @@
 4. Copy the Firebase configuration object and add it wherever needed in  the html pages to add.
 
 **Clone the Repository**
-git clone https://github.com/yourusername/movie-library.git
+git clone https://github.com/TahaHasan21/movie_site.git
 
 **Running the Application**
 Open the index.html file in your browser to access the application.
