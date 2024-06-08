@@ -1,4 +1,4 @@
-****Movie Library****
+# Movie Library
 
 **Features**
 1. User authentication (Sign Up / Sign In / Sign Out)
