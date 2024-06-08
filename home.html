@@ -1,36 +1,142 @@
-
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <title>Movie Library</title>
-  <link rel="stylesheet" type="text/css" href="main.css">
-<!-- <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet"> -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Library</title>
+    <link rel="stylesheet" href="search.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 </head>
 <body>
-  <div class="main">    
-    <input type="checkbox" id="chk" aria-hidden="true">
+<header>
+    <nav class="navbar">
+        <span class="hamburger-btn material-symbols-rounded">menu</span>        
+        <h2>My Movies</h2>
+        <ul class="links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="mylist.html">MyList</a></li>
+        </ul>            
+        <button id="logout" class="logout-btn">LOG OUT</button>
+    </nav>
+</header>
 
-      <div class="signup">
-        <form>
-          <label for="chk" aria-hidden="true">Sign up</label>
-          <input type="text" name="txt" placeholder="User name" required="">
-          <input type="email" name="email" placeholder="Email" required="">
-          <input type="number" name="phone" placeholder="Phone no." required="">
-          <input type="password" name="pswd" placeholder="Password" required="">
-          <button id="signup">Sign up</button>
-        </form>
-      </div>
+<div class="container">
+    <form id="searchForm">
+        <input type="search" id="searchQuery" required>
+        <i class="fa fa-search"></i>
+        <button type="submit" class="searchbtn">Search</button>
+    </form>
+</div>
 
-      <div class="login">
-        <form>
-          <label for="chk" aria-hidden="true">Login</label>
-          <input type="email" name="email" placeholder="Email" required="">
-          <input type="password" name="pswd" placeholder="Password" required="">
-          <button>Login</button>
-        </form>
-      </div>
-  </div>
+<div id="movieDetails" class="movie-details"></div>
 
-  <script type="module" src="script.js"></script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBLNJQxgSanvtbBPi5E9ELMFQs1TOxGDxE",
+        authDomain: "movie-website-6d4ec.firebaseapp.com",
+        projectId: "movie-website-6d4ec",
+        storageBucket: "movie-website-6d4ec.appspot.com",
+        messagingSenderId: "10328262937",
+        appId: "1:10328262937:web:2360d99bb79c6f95d7dd88",
+        measurementId: "G-2XE25RVXS5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    document.getElementById('logout').addEventListener('click', () => {
+        auth.signOut().then(() => {
+            window.location.href = 'index.html';
+        }).catch((error) => {
+            console.error('Error signing out:', error);
+        });
+    });
+
+    const apiKey = 'e87dfff4';
+
+    const searchForm = document.getElementById('searchForm');
+    const searchQueryInput = document.getElementById('searchQuery');
+    const movieDetails = document.getElementById('movieDetails');
+    const container = document.querySelector('.container');
+
+    searchForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        searchMovie();
+        moveSearchToTop();
+    });
+
+    searchQueryInput.addEventListener('input', () => {
+        if (searchQueryInput.value === '') {
+            clearSearchResults();
+        }
+    });
+
+    function searchMovie() {
+        const query = searchQueryInput.value;
+        const url = `https://www.omdbapi.com/?s=${query}&apikey=${apiKey}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.Response === "True") {
+                    displayMovies(data.Search);
+                    saveSearchResults(query, data.Search);
+                } else {
+                    movieDetails.innerHTML = `<p>No movies found</p>`;
+                }
+            })
+            .catch(error => console.error('Error fetching movies:', error));
+    }
+
+    function displayMovies(movies) {
+        movieDetails.innerHTML = '';
+        movies.forEach(movie => {
+            const movieDiv = document.createElement('div');
+            movieDiv.className = 'movie';
+            movieDiv.innerHTML = `
+                <h3>${movie.Title}</h3>
+                <img src="${movie.Poster}" alt="${movie.Title}">
+                <p><strong>Year:</strong> ${movie.Year}</p>
+            `;
+            movieDiv.addEventListener('click', () => {
+                window.location.href = `details.html?id=${movie.imdbID}`;
+            });
+            movieDetails.appendChild(movieDiv);
+        });
+    }
+
+    function saveSearchResults(query, results) {
+        localStorage.setItem('searchQuery', query);
+        localStorage.setItem('searchResults', JSON.stringify(results));
+    }
+
+    function loadSearchResults() {
+        const query = localStorage.getItem('searchQuery');
+        const results = JSON.parse(localStorage.getItem('searchResults'));
+        if (query && results) {
+            searchQueryInput.value = query;
+            displayMovies(results);
+            moveSearchToTop();
+        }
+    }
+
+    function clearSearchResults() {
+        movieDetails.innerHTML = '';
+        localStorage.removeItem('searchQuery');
+        localStorage.removeItem('searchResults');
+        container.classList.remove('top');
+    }
+
+    function moveSearchToTop() {
+        container.classList.add('top');
+    }
+
+    document.addEventListener('DOMContentLoaded', loadSearchResults);
+</script>
 </body>
 </html>
-
